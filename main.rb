@@ -25,8 +25,7 @@ class Scenario
         raise ArgumentError, 'Invalid instructions given' unless instructions =~ /^[L|R|M]+$/
         # Create the rover
         r = Rover.new(i, start, instructions)
-        # Store the rover to the scenario if it is valid, raise an exception and exit if it is not.
-        r.valid?
+        # Store the rover to the scenario, validation would be run on the scenario.
         self.rovers << r
         r
     end
@@ -34,12 +33,26 @@ class Scenario
     def valid?
         #This valid check is to see the validity of the the entire scenario after we added the rovers.
         raise ArgumentError, "No rovers given" unless self.rovers.any?
+
         # Ensure in boundary.
         # build a hash so we can grab all locations and run them against the 
         r_hash = self.rovers.collect{|r| {id: r.id, coordinates: [r.start, r.movements].flatten.map{|c| c.split[0..1].join(" ")}}}
         # run through all the calculated coordinates and
         out_bounds = r_hash.find{|r| r[:coordinates].find{|f| f.split.find{|x, y| !x.to_i.between?(0, grid_x) || !y.to_i.between?(0, grid_y) } }} rescue nil
         raise ArgumentError, "Rover ##{out_bounds[:id]} would go out of bounds. Aborting" if out_bounds
+
+        self.rovers.each_with_index do |r, i|
+            prev_rovers = self.rovers[0...i] #.select{|x| x.id != self.id}
+
+            all_starts = prev_rovers.collect{|x| x.start.split[0..1].join(" ")}
+            this_start = r.start.split[0..1].join(" ")
+            raise ArgumentError, "Rover ##{r.id} cannot start on same location as Rover ##{all_starts.index(this_start)}  " if all_starts.include?(this_start)
+
+            all_ends = prev_rovers.collect{|x| x.movements.last.split[0..1].join(" ")}
+            colission = all_ends & r.movements.map{|x| x.split[0..1].join(" ")}
+            raise ArgumentError, "Rover ##{self.id} will collide with Rover ##{all_ends.index(colission.first)} at #{colission.first}" if colission.any?
+            true
+        end
         true
     end
 
@@ -83,24 +96,6 @@ class Rover
     def to_s
         s = "Rover ##{id}, Start location: #{start}, Instruction set: #{instructions}"
         s += self.movements.nil? ? "" : ", End location: #{self.movements.last}"
-    end
-
-    def valid?
-        prev_rovers = Rover.all.select{|x| x.id != self.id}
-        
-        all_starts = prev_rovers.collect{|x| x.start.split[0..1].join(" ")}
-        this_start = self.start.split[0..1].join(" ")
-        raise ArgumentError, "Rover ##{self.id} cannot start on same location as Rover ##{all_starts.index(this_start)}  " if all_starts.include?(this_start)
-        
-        all_ends = prev_rovers.collect{|x| x.movements.last.split[0..1].join(" ")}
-        colission = all_ends & self.movements.map{|x| x.split[0..1].join(" ")}
-        raise ArgumentError, "Rover ##{self.id} will collide with Rover ##{all_ends.index(colission.first)} at #{colission.first}" if colission.any?
-        true
-    end
-
-    def self.all
-        #ensure to sort by id to get data sequentially. Else the order will be lost as it is accessed through.
-        ObjectSpace.each_object(self).to_a.sort_by(&:id)
     end
 
     def calculate_movements
