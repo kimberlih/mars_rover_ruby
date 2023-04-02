@@ -60,15 +60,7 @@ MMRMMRMRRM
 ---
 # Instructions
 
-### Option 1 - Docker - TODO
-
-If you have docker installed you can run
-
-```
-> docker build
-```
-
-### Option 2 - Ruby
+### Option 1 - Ruby
 
 If you have ruby installed you can run it as follows:
 
@@ -81,6 +73,31 @@ There are multiple input files, some are `valid_` while others are `invalid`
 #### Makefile - TODO
 
 Make file will be provided to easily run commands with the make tool.
+
+To setup the gems:
+
+```
+make install
+```
+
+To run the challenge input against the script
+```
+make run
+```
+
+To run the test suite
+```
+make test
+```
+
+### Option 2 - Docker - TODO
+
+If you have docker installed you can run
+
+```
+> docker build -t ruby_msc .
+> docker run -it ruby_msc
+```
 
 # Testing
 
