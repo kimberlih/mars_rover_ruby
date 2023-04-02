@@ -7,7 +7,7 @@ class Scenario
   attr_accessor :grid_x, :grid_y, :rovers
 
   def initialize
-    self.rovers = []
+    self.rovers ||= []
   end
 
   def parse_grid(grid)
