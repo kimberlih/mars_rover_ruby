@@ -81,3 +81,16 @@ There are multiple input files, some are `valid_` while others are `invalid`
 #### Makefile - TODO
 
 Make file will be provided to easily run commands with the make tool.
+
+# Testing
+
+The tests are written in rspec. You can run them as follows:
+
+```
+> bundle install
+> bundle exec rake spec
+.................
+
+Finished in 0.00676 seconds (files took 0.0579 seconds to load)
+17 examples, 0 failures
+```
