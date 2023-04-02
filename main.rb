@@ -8,60 +8,51 @@
 DIRECTIONS = ["N", "E", "S", "W"]
 MOVEMENT = {"N" => [0, 1], "E" => [1, 0], "S" => [0, -1], "W" => [-1, 0]}
 
-def run()
-    scen = Scenario.new
-    begin
-        scen.get_grid()
-        scen.get_rovers()
-        scen.valid?()
-        scen.display()
-    rescue ArgumentError => e
-        #if any of the inputs cause an exception we would print the error message.
-        #It is up to the user to change the inputs and try again, this script is not about prompting for inputs
-        puts(e)
-    end
-end
+
 
 class Scenario 
     attr_accessor :grid_x, :grid_y, :rovers
 
-    def get_grid()
-        #grab the first line and remove from stack, this makes it easier to process the rovers two lines at a time.
-        grid = gets.chomp
+    def initialize
+        self.rovers = []
+    end
+
+    def parse_grid(grid)
         # First do a regex format check. Doing this later in the .valid? method could open up the app for unnecesery errors.
         raise ArgumentError, 'Invalid grid coordinates' unless grid =~ /^\d+\s\d+$/
 
         # assign the grid values to the scenario variables
-        self.grid_x, self.grid_y = grid.split(" ").map{|x| x.to_i}
+        self.grid_x, self.grid_y = grid.split(" ").map{|x| x.delete("\n").to_i}
     end
 
-    def get_rovers()
-        STDIN.each_slice(2).each_with_index do |lines, i|
-            # Grab the two lines, but make sure to remove any newline characters as well to reduce chance of errors.
-            start, instructions = lines.map{|x| x.delete("\n")}
-            # First do a regex format check. Doing this later in the .valid? method could open up the app for unnecesery errors.
-            raise ArgumentError, 'Invalid start coordinates' unless start =~ /^\d+\s\d+\s[N|E|S|W]$/
-            raise ArgumentError, 'Invalid instructions given' unless instructions =~ /^[L|R|M]+$/
-            # Create the rover
-            r = Rover.new(i, start, instructions)
-            # Store the rover to the scenario if it is valid, raise an exception and exit if it is not.
-            rovers << r if r.valid?
-        end
+    def add_rover(lines, i)
+        # Grab the two lines, but make sure to remove any newline characters as well to reduce chance of errors.
+        start, instructions = lines.map{|x| x.delete("\n")}
+        # First do a regex format check. Doing this later in the .valid? method could open up the app for unnecesery errors.
+        raise ArgumentError, 'Invalid start coordinates' unless start =~ /^\d+\s\d+\s[N|E|S|W]$/
+        raise ArgumentError, 'Invalid instructions given' unless instructions =~ /^[L|R|M]+$/
+        # Create the rover
+        r = Rover.new(i, start, instructions)
+        # Store the rover to the scenario if it is valid, raise an exception and exit if it is not.
+        r.valid?
+        self.rovers << r
+        r
     end
 
     def valid?
         #This valid check is to see the validity of the the entire scenario after we added the rovers.
-
-        # Ensure in bounds.
+        raise ArgumentError, "No rovers given" unless self.rovers.any?
+        # Ensure in boundary.
         # build a hash so we can grab all locations and run them against the 
-        r_hash = Rover.all.collect{|r| {id: r.id, coordinates: [r.start, r.movements].flatten.map{|c| c.split[0..1].join(" ")}}}
+        r_hash = self.rovers.collect{|r| {id: r.id, coordinates: [r.start, r.movements].flatten.map{|c| c.split[0..1].join(" ")}}}
         # run through all the calculated coordinates and
         out_bounds = r_hash.find{|r| r[:coordinates].find{|f| f.split.find{|x, y| !x.to_i.between?(0, grid_x) || !y.to_i.between?(0, grid_y) } }} rescue nil
         raise ArgumentError, "Rover ##{out_bounds[:id]} would go out of bounds. Aborting" if out_bounds
+        true
     end
 
     def display()
-        objects = Rover.all
+        objects = self.rovers
         # objects_simple_start = objects.collect{|x| x.start}.map{|o| o.split[0..1].join(" ")}
         objects_simple_end = objects.collect{|x| x.movements.last}.map{|o| o.split[0..1].join(" ")}
         output = "" # All output gets stored to this variable
@@ -82,9 +73,8 @@ class Scenario
         end
         output += horizonal_line + "+\n"
         output += bottom_num + (0..grid_x).to_a.join("  ") + "\n"
-        # output += bottom_num + "\n"
-        print(output)
-        puts Rover.all.map(&:to_s)
+        output += self.rovers.map(&:to_s).join("\n") + "\n"
+        output
     end
 end
 
@@ -95,7 +85,7 @@ class Rover
         @id = id
         @start = start
         @instructions = instructions
-        @movements = calulate_movements(start, instructions) rescue []
+        @movements = self.calculate_movements() rescue []
     end
 
     def to_s
@@ -103,7 +93,7 @@ class Rover
         s += self.movements.nil? ? "" : ", End location: #{self.movements.last}"
     end
 
-    def valid?(scenario=nil)
+    def valid?
         prev_rovers = Rover.all.select{|x| x.id != self.id}
         
         all_starts = prev_rovers.collect{|x| x.start.split[0..1].join(" ")}
@@ -111,12 +101,9 @@ class Rover
         raise ArgumentError, "Rover ##{self.id} cannot start on same location as Rover ##{all_starts.index(this_start)}  " if all_starts.include?(this_start)
         
         all_ends = prev_rovers.collect{|x| x.movements.last.split[0..1].join(" ")}
-        colission = all_ends & self.movements_simple
+        colission = all_ends & self.movements.map{|x| x.split[0..1].join(" ")}
         raise ArgumentError, "Rover ##{self.id} will collide with Rover ##{all_ends.index(colission.first)} at #{colission.first}" if colission.any?
-    end
-
-    def movements_simple
-        self.movements.map{|x| x.split[0..1].join(" ")}
+        true
     end
 
     def self.all
@@ -124,10 +111,10 @@ class Rover
         ObjectSpace.each_object(self).to_a.sort_by(&:id)
     end
 
-    def calulate_movements(start, instructions)
+    def calculate_movements
         movements = []
-        position = start.split()
-        instructions.split("").each do |i|
+        position = self.start.split()
+        self.instructions.split("").each do |i|
             case i
             when "L"
                 position[2] = DIRECTIONS[DIRECTIONS.index(position[2]) - 1]
@@ -143,4 +130,21 @@ class Rover
     end
 end
 
-run()
+if $0 == __FILE__
+    scen = Scenario.new
+    begin
+        #grab the first line and remove from stack, this makes it easier to process the rovers two lines at a time.
+        grid = gets.chomp
+        scen.parse_grid(grid)
+    
+        STDIN.each_slice(2).each_with_index do |lines, i|
+            scen.add_rover(lines, i)
+        end
+        scen.valid?()
+        puts scen.display()
+    rescue ArgumentError => e
+        #if any of the inputs cause an exception we would print the error message.
+        #It is up to the user to change the inputs and try again, this script is not about prompting for inputs through loops
+        puts(e)
+    end
+end
