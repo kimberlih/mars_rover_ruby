@@ -1,14 +1,6 @@
-# This is a quick way of testing mars rover inputs
-# Assumptions:
-# 1. Cannot start on same location.
-# 2. When entering another Rover check whether its path would collide with the end point of previously entered rovers
-# 3. we assume inputs will always come from a file, and not manual input. 
-
 # Constants
 DIRECTIONS = ["N", "E", "S", "W"]
 MOVEMENT = {"N" => [0, 1], "E" => [1, 0], "S" => [0, -1], "W" => [-1, 0]}
-
-
 
 class Scenario 
     attr_accessor :grid_x, :grid_y, :rovers

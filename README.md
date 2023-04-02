@@ -94,3 +94,15 @@ The tests are written in rspec. You can run them as follows:
 Finished in 0.00676 seconds (files took 0.0579 seconds to load)
 17 examples, 0 failures
 ```
+
+# Assumptions & rules made
+
+1. Cannot start on same location.
+2. When entering another Rover check whether at any point its path would collide with the end point of previously entered rovers
+3. we assume inputs will always come from a file, and not manual input. So there are no promps, but you should be able to enter the data manually still
+4. Rovers cannot go out of bounds.
+
+# TODO
+
+1. improve the display grid to work with dual or triple digit numbers without breaking the spacing/padding
+2. Add telnet functionality
