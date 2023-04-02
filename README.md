@@ -58,7 +58,7 @@ MMRMMRMRRM
 ```
 
 ---
-# Instructions
+# Installation Instructions
 
 ### Option 1 - Ruby
 
@@ -70,7 +70,7 @@ If you have ruby installed you can run it as follows:
 
 There are multiple input files, some are `valid_` while others are `invalid`
 
-#### Makefile - TODO
+#### Makefile
 
 Make file will be provided to easily run commands with the make tool.
 
@@ -90,7 +90,7 @@ To run the test suite
 make test
 ```
 
-### Option 2 - Docker - TODO
+### Option 2 - Docker - (Incomplete)
 
 If you have docker installed you can run
 
@@ -106,10 +106,10 @@ The tests are written in rspec. You can run them as follows:
 ```
 > bundle install
 > bundle exec rake spec
-.................
+...................
 
 Finished in 0.00676 seconds (files took 0.0579 seconds to load)
-17 examples, 0 failures
+19 examples, 0 failures
 ```
 
 # Assumptions & rules made
