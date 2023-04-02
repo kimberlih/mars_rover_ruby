@@ -1,5 +1,4 @@
 # Constants
-
 DIRECTIONS = %w[N E S W]
 MOVEMENT = { 'N' => [0, 1], 'E' => [1, 0], 'S' => [0, -1], 'W' => [-1, 0] }
 
@@ -58,23 +57,15 @@ class Scenario
     raise ArgumentError, "Rover ##{out_bounds[:id]} would go out of bounds. Aborting" if out_bounds
 
     rovers.each_with_index do |r, i|
-      prev_rovers = rovers[0...i] # .select{|x| x.id != self.id}
+      prev_rovers = rovers[0...i]
 
       all_starts = prev_rovers.collect { |x| x.start.split[0..1].join(' ') }
       this_start = r.start.split[0..1].join(' ')
-      if all_starts.include?(this_start)
-        raise ArgumentError,
-              "Rover ##{r.id} cannot start on same location as Rover ##{all_starts.index(this_start)}  "
-      end
+      raise ArgumentError, "Rover ##{r.id} cannot start on same location as Rover ##{all_starts.index(this_start)}" if all_starts.include?(this_start)
 
       all_ends = prev_rovers.collect { |x| x.movements.last.split[0..1].join(' ') }
       colission = all_ends & r.movements.map { |x| x.split[0..1].join(' ') }
-      if colission.any?
-        raise ArgumentError,
-              "Rover ##{id} will collide with Rover ##{all_ends.index(colission.first)} at #{colission.first}"
-      end
-
-      true
+      raise ArgumentError, "Rover ##{id} will collide with Rover ##{all_ends.index(colission.first)} at #{colission.first}" if colission.any?
     end
     true
   end
@@ -106,6 +97,7 @@ class Scenario
   end
 end
 
+# This class is to build and run calculations on the rover
 class Rover
   attr_accessor :id, :start, :instructions, :movements
 
@@ -121,8 +113,7 @@ class Rover
   end
 
   def to_s
-    s = "Rover ##{id}, Start location: #{start}, Instruction set: #{instructions}"
-    s += movements.nil? ? '' : ", End location: #{movements.last}"
+    "Rover ##{id}, Start location: #{start}, End location: #{movements.last}, Instruction set: #{instructions}"
   end
 
   def calculate_movements

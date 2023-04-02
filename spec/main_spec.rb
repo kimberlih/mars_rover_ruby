@@ -16,8 +16,8 @@ VALID_OUTPUT = <<~TEXT
   0 |  |  |  |  |  |  |
     +--+--+--+--+--+--+
      0  1  2  3  4  5
-  Rover #0, Start location: 1 2 N, Instruction set: LMLMLMLMM, End location: 1 3 N
-  Rover #1, Start location: 3 3 E, Instruction set: MMRMMRMRRM, End location: 5 1 E
+  Rover #0, Start location: 1 2 N, End location: 1 3 N, Instruction set: LMLMLMLMM
+  Rover #1, Start location: 3 3 E, End location: 5 1 E, Instruction set: MMRMMRMRRM
 TEXT
 
 describe Scenario do
@@ -123,7 +123,7 @@ describe Rover do
 
   describe 'to_s' do
     it 'should return a human readable string of the rovers input and end location' do
-      expect(@rover.to_s).to eq('Rover #0, Start location: 1 1 N, Instruction set: MMM, End location: 1 4 N')
+      expect(@rover.to_s).to eq('Rover #0, Start location: 1 1 N, End location: 1 4 N, Instruction set: MMM')
     end
   end
 
