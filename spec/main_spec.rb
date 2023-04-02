@@ -89,10 +89,24 @@ describe Scenario do
     end
 
     it 'should return true when the scnario is valid' do
-      @scenario = Scenario.new
+      # @scenario = Scenario.new
       @scenario.parse_grid('3 3')
       @scenario.add_rover(['1 1 N', 'M'], 0)
       expect(@scenario.valid?).to eq(true)
+    end
+
+    it 'it should throw an ArgumentError if two rovers start at the same location' do
+      @scenario.parse_grid('3 3')
+      @scenario.add_rover(['1 1 N', 'M'], 0)
+      @scenario.add_rover(['1 1 N', 'M'], 1)
+      expect { @scenario.valid? }.to raise_error(ArgumentError, "Rover #1 cannot start on same location as Rover #0")
+    end
+
+    it 'it should throw an ArgumentError if two rovers will collide after previous rovers moved' do
+      @scenario.parse_grid('3 3')
+      @scenario.add_rover(['1 1 N', 'M'], 0)
+      @scenario.add_rover(['1 0 N', 'MM'], 1)
+      expect { @scenario.valid? }.to raise_error(ArgumentError, "Rover #1 will collide with Rover #0 at 1 2")
     end
   end
 
@@ -127,17 +141,6 @@ describe Rover do
     end
   end
 
-  describe 'valid?' do
-    # TODO: rework
-    # it 'it should throw an ArgumentError if two rovers start at the same location' do
-    #   expect { Rover.new }.to raise_error(ArgumentError, "wrong number of arguments (given 0, expected 3)")
-    # end
-
-    # TODO: rework
-    # it 'it should throw an ArgumentError if two rovers will collide after previous rovers moved' do
-    #   expect { Rover.new }.to raise_error(ArgumentError, "wrong number of arguments (given 0, expected 3)")
-    # end
-  end
 
   describe '.calculate_movements' do
     it 'calculates the every movement step and saves to movements' do

@@ -2,6 +2,7 @@
 DIRECTIONS = %w[N E S W]
 MOVEMENT = { 'N' => [0, 1], 'E' => [1, 0], 'S' => [0, -1], 'W' => [-1, 0] }
 
+# Each input set(grid and rover details) is a scenario.
 class Scenario
   attr_accessor :grid_x, :grid_y, :rovers
 
@@ -65,7 +66,7 @@ class Scenario
 
       all_ends = prev_rovers.collect { |x| x.movements.last.split[0..1].join(' ') }
       colission = all_ends & r.movements.map { |x| x.split[0..1].join(' ') }
-      raise ArgumentError, "Rover ##{id} will collide with Rover ##{all_ends.index(colission.first)} at #{colission.first}" if colission.any?
+      raise ArgumentError, "Rover ##{r.id} will collide with Rover ##{all_ends.index(colission.first)} at #{colission.first}" if colission.any?
     end
     true
   end
@@ -75,7 +76,7 @@ class Scenario
     objects_simple_end = objects.collect { |x| x.movements.last }.map { |o| o.split[0..1].join(' ') }
     output = '' # All output gets stored to this variable
     bottom_num = '   ' # Holds the x axis numbers
-    horizonal_line = '' # Holds the horizontal line, we declare this her so we can use it for the last line after the final loop
+    horizonal_line = '' # Holds the horizontal line
     (0..grid_y).to_a.reverse.each do |y_i|
       horizonal_line = '  ' # Add padding, this is required for the table to aline with visible numbers
       container_row = "#{y_i} " #  Add the numbers for the y axis info
