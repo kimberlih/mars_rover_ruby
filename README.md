@@ -138,4 +138,4 @@ Finished in 0.00676 seconds (files took 0.0579 seconds to load)
 # TODO
 
 1. improve the display grid to work with dual or triple digit numbers without breaking the spacing/padding
-2. Add telnet functionality
+2. ~~Add telnet functionality~~ (the 'net-telnet' gem is poorly documented, switching to an SSH server implementation instead as that is has more relevance)
