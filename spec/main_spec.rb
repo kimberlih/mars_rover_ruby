@@ -25,96 +25,100 @@ describe Scenario do
     @scenario = Scenario.new
   end
 
-  describe 'parse_grid' do
+  describe 'set_grid' do
     it 'should throw an exception when no arguements given.' do
-      expect { @scenario.parse_grid }.to raise_error(ArgumentError, 'wrong number of arguments (given 0, expected 1)')
+      expect { @scenario.set_grid }.to raise_error(ArgumentError, 'wrong number of arguments (given 0, expected 1)')
     end
 
     it 'should throw an exception when invalid arguements given.' do
       grid = 'invalid'
-      expect { @scenario.parse_grid(grid) }.to raise_error(ArgumentError, 'Invalid grid coordinates')
+      expect { @scenario.set_grid(grid) }.to raise_error(ArgumentError, 'Invalid grid coordinates')
     end
 
     it 'should return an array with two integers when valid grid given.' do
       grid = '55 55'
-      expect(@scenario.parse_grid(grid)).to eq([55, 55])
+      expect(@scenario.set_grid(grid)).to eq([55, 55])
     end
 
     it 'should return an array with two integers when valid grid give that contains large numbers.' do
       grid = '54444445 5555555'
-      expect(@scenario.parse_grid(grid)).to eq([54_444_445, 5_555_555])
+      expect(@scenario.set_grid(grid)).to eq([54_444_445, 5_555_555])
     end
   end
 
   describe '.add_rover' do
     it 'should throw an exception when no arguements given.' do
-      expect { @scenario.add_rover }.to raise_error(ArgumentError, 'wrong number of arguments (given 0, expected 2)')
+      expect { @scenario.add_rover }.to raise_error(ArgumentError, 'wrong number of arguments (given 0, expected 3)')
     end
 
     it 'should throw an exception when invalid start cooirdinates given.' do
-      lines = ['1 W N', 'LMLM']
+      moves = 'LMLM'
+      start = '1 W N'
       index = 0
-      expect { @scenario.add_rover(lines, index) }.to raise_error(ArgumentError, 'Invalid start coordinates')
+      expect { @scenario.add_rover(index, start, moves) }.to raise_error(ArgumentError, 'Invalid start coordinates')
     end
 
     it 'should throw an exception when invalid start cooirdinates given.' do
-      lines = ['1 5 X', 'LMLM']
+      moves = 'LMLM'
+      start = '1 5 X'
       index = 0
-      expect { @scenario.add_rover(lines, index) }.to raise_error(ArgumentError, 'Invalid start coordinates')
+      expect { @scenario.add_rover(index, start, moves) }.to raise_error(ArgumentError, 'Invalid start coordinates')
     end
 
     it 'should throw an exception when invalid instructions given.' do
-      lines = ['1 1 N', 'LMXLM']
+      moves = 'LMXLM'
+      start = '1 1 N'
       index = 0
-      expect { @scenario.add_rover(lines, index) }.to raise_error(ArgumentError, 'Invalid instructions given')
+      expect { @scenario.add_rover(index, start, moves) }.to raise_error(ArgumentError, 'Invalid instructions given')
     end
 
     it 'should return an array with two integers when valid grid given.' do
-      lines = ['1 1 N', 'LMLM']
+      moves = 'LMLM'
+      start = '1 1 N'
       index = 0
-      expect(@scenario.add_rover(lines, index)).to be_a(Rover)
+      expect(@scenario.add_rover(index, start, moves)).to be_a(Rover)
     end
   end
 
   describe '.valid?' do
     it 'should throw an exception when no rovers are added to the Scenario' do
-      @scenario.parse_grid('5 5')
+      @scenario.set_grid('5 5')
       expect { @scenario.valid? }.to raise_error(ArgumentError, 'No rovers given')
     end
 
     it 'should throw an exception when rovers go out of bounds' do
-      @scenario.parse_grid('2 2')
-      @scenario.add_rover(['1 1 N', 'MMM'], 0)
+      @scenario.set_grid('2 2')
+      @scenario.add_rover(0, '1 1 N', 'MMM')
       expect { @scenario.valid? }.to raise_error(ArgumentError, 'Rover #0 would go out of bounds. Aborting')
     end
 
     it 'should return true when the scnario is valid' do
       # @scenario = Scenario.new
-      @scenario.parse_grid('3 3')
-      @scenario.add_rover(['1 1 N', 'M'], 0)
+      @scenario.set_grid('3 3')
+      @scenario.add_rover(0, '1 1 N', 'M')
       expect(@scenario.valid?).to eq(true)
     end
 
     it 'it should throw an ArgumentError if two rovers start at the same location' do
-      @scenario.parse_grid('3 3')
-      @scenario.add_rover(['1 1 N', 'M'], 0)
-      @scenario.add_rover(['1 1 N', 'M'], 1)
+      @scenario.set_grid('3 3')
+      @scenario.add_rover(0, '1 1 N', 'M')
+      @scenario.add_rover(1, '1 1 N', 'M')
       expect { @scenario.valid? }.to raise_error(ArgumentError, "Rover #1 cannot start on same location as Rover #0")
     end
 
     it 'it should throw an ArgumentError if two rovers will collide after previous rovers moved' do
-      @scenario.parse_grid('3 3')
-      @scenario.add_rover(['1 1 N', 'M'], 0)
-      @scenario.add_rover(['1 0 N', 'MM'], 1)
+      @scenario.set_grid('3 3')
+      @scenario.add_rover(0, '1 1 N', 'M')
+      @scenario.add_rover(1, '1 0 N', 'MM')
       expect { @scenario.valid? }.to raise_error(ArgumentError, "Rover #1 will collide with Rover #0 at 1 2")
     end
   end
 
   describe '.get_display' do
     it 'should return a string output that draws a graph in the terminal' do
-      @scenario.parse_grid('5 5')
-      @scenario.add_rover(['1 2 N', 'LMLMLMLMM'], 0)
-      @scenario.add_rover(['3 3 E', 'MMRMMRMRRM'], 1)
+      @scenario.set_grid('5 5')
+      @scenario.add_rover(0, '1 2 N', 'LMLMLMLMM')
+      @scenario.add_rover(1, '3 3 E', 'MMRMMRMRRM')
       expect(@scenario.display).to eq(VALID_OUTPUT)
     end
   end

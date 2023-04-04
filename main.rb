@@ -1,3 +1,8 @@
+#Regex
+GRID = /^\d+\s\d+$/
+START = /^\d+\s\d+\s[N|E|S|W]$/
+MOVE = /^[L|R|M]+$/
+
 # Constants
 DIRECTIONS = %w[N E S W]
 MOVEMENT = { 'N' => [0, 1], 'E' => [1, 0], 'S' => [0, -1], 'W' => [-1, 0] }
@@ -10,23 +15,21 @@ class Scenario
     self.rovers ||= []
   end
 
-  def parse_grid(grid)
+  def set_grid(grid)
     # First do a regex format check. Doing this later in the .valid? method could open up the app for unnecesery errors.
-    raise ArgumentError, 'Invalid grid coordinates' unless grid =~ /^\d+\s\d+$/
+    raise ArgumentError, 'Invalid grid coordinates' unless grid =~ GRID
 
     # assign the grid values to the scenario variables
     self.grid_x, self.grid_y = grid.split(' ').map { |x| x.delete("\n").to_i }
   end
 
-  def add_rover(lines, i)
-    # Grab the two lines, but make sure to remove any newline characters as well to reduce chance of errors.
-    start, instructions = lines.map { |x| x.delete("\n") }
+  def add_rover(i, start, movements)
     # First do a regex format check. Doing this later in the .valid? method could open up the app for unnecesery errors.
-    raise ArgumentError, 'Invalid start coordinates' unless start =~ /^\d+\s\d+\s[N|E|S|W]$/
-    raise ArgumentError, 'Invalid instructions given' unless instructions =~ /^[L|R|M]+$/
+    raise ArgumentError, 'Invalid start coordinates' unless start =~ START
+    raise ArgumentError, 'Invalid instructions given' unless movements =~ MOVE
 
     # Create the rover
-    r = Rover.new(i, start, instructions)
+    r = Rover.new(i, start, movements)
     # Store the rover to the scenario, validation would be run on the scenario.
     rovers << r
     r
@@ -137,16 +140,56 @@ class Rover
   end
 end
 
+def get_inputs
+  puts "Enter the grid size for the scenario"
+  grid = gets.chomp
+  while !(grid =~ GRID)
+      puts "Invalid grid coordinates given, Please enter coordinates again eg '6 6'  "
+      grid = gets.chomp
+  end
+
+  i = 0
+  rovers = []
+  while true
+    msg =  "Please enter the start coordinates for Rover ##{i}.";
+    if i == 0 
+        puts msg
+    else
+        puts msg + ' Alternatively press enter to stop adding Rovers'
+    end
+
+    start = gets.chomp rescue '' 
+    break if start == '' && i > 0
+    while !(start =~ START)
+        puts start
+        puts "Invalid start coordinates given for Rover ##{i}, Please enter coordinates again eg '1 2 N'"
+        start = gets.chomp
+    end
+
+    puts "Please enter the movement instructions for Rover ##{i}.";
+    move = gets.chomp
+    while !(move =~ MOVE)
+        puts "Invalid movement instructions given for Rover ##{i}, Please enter instructions again eg 'LRM'"
+        move = gets.chomp
+    end
+
+    rovers << {id: i, start: start, move: move}
+    i += 1
+  end
+  return grid, rovers
+end
+
+
 if $PROGRAM_NAME == __FILE__
   scen = Scenario.new
   begin
-    # grab the first line and remove from stack, this makes it easier to process the rovers two lines at a time.
-    grid = gets.chomp
-    scen.parse_grid(grid)
+    grid, rovers = get_inputs()
+    scen.set_grid(grid)
 
-    $stdin.each_slice(2).each_with_index do |lines, i|
-      scen.add_rover(lines, i)
+    rovers.each do |r|
+      scen.add_rover(r[:id], r[:start], r[:move])
     end
+
     scen.valid?
     puts scen.display
   rescue ArgumentError => e
