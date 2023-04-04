@@ -66,22 +66,6 @@ If you have ruby installed you can run it as follows:
 
 ```
 > ruby main.rb < inputs/valid_000
-  +--+--+--+--+--+--+
-5 |  |  |  |  |  |  |
-  +--+--+--+--+--+--+
-4 |  |  |  |  |  |  |
-  +--+--+--+--+--+--+
-3 |  |#0|  |  |  |  |
-  +--+--+--+--+--+--+
-2 |  |  |  |  |  |  |
-  +--+--+--+--+--+--+
-1 |  |  |  |  |  |#1|
-  +--+--+--+--+--+--+
-0 |  |  |  |  |  |  |
-  +--+--+--+--+--+--+
-   0  1  2  3  4  5
-Rover #0, Start location: 1 2 N, End location: 1 3 N, Instruction set: LMLMLMLMM
-Rover #1, Start location: 3 3 E, End location: 5 1 E, Instruction set: MMRMMRMRRM
 ```
 
 There are multiple input files, some are `valid_` while others are `invalid`
@@ -106,7 +90,7 @@ To run the test suite
 make test
 ```
 
-### Option 2 - Docker - (Incomplete)
+### Option 2 - Docker
 
 If you have docker installed you can run
 
